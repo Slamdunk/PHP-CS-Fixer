@@ -21,6 +21,26 @@ use PhpCsFixer\Test\AbstractFixerTestCase;
  */
 final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
 {
+    public function testInvalidConfigMissingKey()
+    {
+        $this->setExpectedExceptionRegExp(
+            'PhpCsFixer\ConfigurationException\InvalidFixerConfigurationException',
+            '#^\[method_argument_space\] Missing "keepMultipleSpacesAfterComma" configuration.$#'
+        );
+
+        $this->fixer->configure(array('a' => 1));
+    }
+
+    public function testInvalidConfigurationValueType()
+    {
+        $this->setExpectedExceptionRegExp(
+            'PhpCsFixer\ConfigurationException\InvalidFixerConfigurationException',
+            '/^\[method_argument_space\] Configuration value for item "keepMultipleSpacesAfterComma" must be a bool, got "string".$/'
+        );
+
+        $this->fixer->configure(array('keepMultipleSpacesAfterComma' => 'none'));
+    }
+
     /**
      * @param string      $expected
      * @param null|string $input
@@ -29,6 +49,24 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
      */
     public function testFix($expected, $input = null)
     {
+        $this->doTest($expected, $input);
+    }
+
+    /**
+     * @param string      $expected
+     * @param null|string $input
+     * @param null|string $extraSpaceInput
+     * @param null|mixed  $expectedWithKeepMultipleSpacesAfterComma
+     *
+     * @dataProvider testFixProvider
+     */
+    public function testFixKeepMultipleSpacesAfterComma($expected, $input = null, $expectedWithKeepMultipleSpacesAfterComma = null)
+    {
+        if ($expectedWithKeepMultipleSpacesAfterComma !== null) {
+            $expected = $expectedWithKeepMultipleSpacesAfterComma;
+        }
+
+        $this->fixer->configure(array('keepMultipleSpacesAfterComma' => true));
         $this->doTest($expected, $input);
     }
 
@@ -46,6 +84,7 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
             'test method arguments with multiple spaces' => array(
                 '<?php function xyz($a=10, $b=20, $c=30) {}',
                 '<?php function xyz($a=10,         $b=20 , $c=30) {}',
+                '<?php function xyz($a=10,         $b=20, $c=30) {}',
             ),
             'test method call' => array(
                 '<?php xyz($a=10, $b=20, $c=30);',
@@ -54,10 +93,12 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
             'test method call with multiple spaces' => array(
                 '<?php xyz($a=10, $b=20, $c=30);',
                 '<?php xyz($a=10 , $b=20 ,          $c=30);',
+                '<?php xyz($a=10, $b=20,          $c=30);',
             ),
             'test method call with tab' => array(
                 '<?php xyz($a=10, $b=20, $c=30);',
                 "<?php xyz(\$a=10 , \$b=20 ,\t \$c=30);",
+                "<?php xyz(\$a=10, \$b=20,\t \$c=30);",
             ),
             'test method call with \n not affected' => array(
                 "<?php xyz(\$a=10, \$b=20,\n                    \$c=30);",
@@ -72,6 +113,7 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
             'test method call with multiple spaces' => array(
                 '<?php xyz($a=10, $b=20, $this->foo(), $c=30);',
                 '<?php xyz($a=10,$b=20 ,         $this->foo() ,$c=30);',
+                '<?php xyz($a=10, $b=20,         $this->foo(), $c=30);',
             ),
             'test receiving data in list context with omitted values' => array(
                 '<?php list($a, $b, , , $c) = foo();',
@@ -80,6 +122,7 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
             'test receiving data in list context with omitted values and multiple spaces' => array(
                 '<?php list($a, $b, , , $c) = foo();',
                 '<?php list($a, $b,,    ,$c) = foo();',
+                '<?php list($a, $b, ,    , $c) = foo();',
             ),
             'skip array' => array(
                 '<?php array(10 , 20 ,30);',
@@ -91,6 +134,7 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
             'inline comments with spaces' => array(
                 '<?php xyz($a=10, /*comment1*/ $b=2000, /*comment2*/ $c=30);',
                 '<?php xyz($a=10,    /*comment1*/ $b=2000,/*comment2*/ $c=30);',
+                '<?php xyz($a=10,    /*comment1*/ $b=2000, /*comment2*/ $c=30);',
             ),
             'must keep align comments' => array(
                 '<?php function xyz(
@@ -166,6 +210,7 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
             'skip arrays but replace arg methods' => array(
                 '<?php fnc(1, array(2, func2(6, 7) ,4), 5);',
                 '<?php fnc(1,array(2, func2(6,    7) ,4),    5);',
+                '<?php fnc(1, array(2, func2(6,    7) ,4),    5);',
             ),
             'ignore commas inside call argument' => array(
                 '<?php fnc(1, array(2, 3 ,4), 5);',

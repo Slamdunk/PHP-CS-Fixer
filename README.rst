@@ -296,6 +296,7 @@ Choose from the list of available rules:
 * **method_argument_space** [@PSR2, @Symfony]
    | In method arguments and method call, there MUST NOT be a space before
    | each comma and there MUST be one space after each comma.
+   | *Rule is: configurable.*
 
 * **method_separation** [@Symfony]
    | Methods must be separated with one blank line.

@@ -29,11 +29,16 @@ use PhpCsFixer\Tokenizer\Tokens;
 final class MethodArgumentSpaceFixer extends AbstractFixer implements ConfigurableFixerInterface
 {
     /**
+     * @var array<string, bool>
+     */
+    private static $defaultConfiguration = array('keepMultipleSpacesAfterComma' => false);
+
+    /**
      * Preserve existing multiple spaces after comma.
      *
      * @var bool
      */
-    private $keepMultipleSpacesAfterComma = false;
+    private $keepMultipleSpacesAfterComma;
 
     /**
      * @param null|array $configuration
@@ -43,21 +48,20 @@ final class MethodArgumentSpaceFixer extends AbstractFixer implements Configurab
     public function configure(array $configuration = null)
     {
         if (null === $configuration) {
-            $this->keepMultipleSpacesAfterComma = false;
+            $configuration = self::$defaultConfiguration;
+        } else {
+            if (!array_key_exists('keepMultipleSpacesAfterComma', $configuration)) {
+                throw new InvalidFixerConfigurationException($this->getName(), 'Missing "keepMultipleSpacesAfterComma" configuration.');
+            }
 
-            return;
+            if (!is_bool($configuration['keepMultipleSpacesAfterComma'])) {
+                $value = $configuration['keepMultipleSpacesAfterComma'];
+
+                throw new InvalidFixerConfigurationException($this->getName(), sprintf('Configuration value for item "keepMultipleSpacesAfterComma" must be a bool, got "%s".', is_object($value) ? get_class($value) : gettype($value)));
+            }
         }
 
-        if (!array_key_exists('keepMultipleSpacesAfterComma', $configuration)) {
-            throw new InvalidFixerConfigurationException($this->getName(), 'Missing "keepMultipleSpacesAfterComma" configuration.');
-        }
-
-        $value = $configuration['keepMultipleSpacesAfterComma'];
-        if (!is_bool($value)) {
-            throw new InvalidFixerConfigurationException($this->getName(), sprintf('Configuration value for item "keepMultipleSpacesAfterComma" must be a bool, got "%s".', is_object($value) ? get_class($value) : gettype($value)));
-        }
-
-        $this->keepMultipleSpacesAfterComma = $value;
+        $this->keepMultipleSpacesAfterComma = $configuration['keepMultipleSpacesAfterComma'];
     }
 
     /**
@@ -65,7 +69,7 @@ final class MethodArgumentSpaceFixer extends AbstractFixer implements Configurab
      */
     public function fix(\SplFileInfo $file, Tokens $tokens)
     {
-        for ($index = $tokens->count() - 1; $index >= 0; --$index) {
+        for ($index = $tokens->count() - 1; $index > 0; --$index) {
             $token = $tokens[$index];
 
             if ($token->equals('(') && !$tokens[$index - 1]->isGivenKind(T_ARRAY)) {
@@ -109,7 +113,7 @@ final class MethodArgumentSpaceFixer extends AbstractFixer implements Configurab
             ),
             null,
             'Configure to retain multiple spaces after comma.',
-            array('keepMultipleSpacesAfterComma' => false)
+            self::$defaultConfiguration
         );
     }
 

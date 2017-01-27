@@ -55,14 +55,13 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
     /**
      * @param string      $expected
      * @param null|string $input
-     * @param null|string $extraSpaceInput
-     * @param null|mixed  $expectedWithKeepMultipleSpacesAfterComma
+     * @param null|string $expectedWithKeepMultipleSpacesAfterComma
      *
      * @dataProvider testFixProvider
      */
     public function testFixKeepMultipleSpacesAfterComma($expected, $input = null, $expectedWithKeepMultipleSpacesAfterComma = null)
     {
-        if ($expectedWithKeepMultipleSpacesAfterComma !== null) {
+        if (null !== $expectedWithKeepMultipleSpacesAfterComma) {
             $expected = $expectedWithKeepMultipleSpacesAfterComma;
         }
 
@@ -86,11 +85,11 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
                 '<?php function xyz($a=10,         $b=20 , $c=30) {}',
                 '<?php function xyz($a=10,         $b=20, $c=30) {}',
             ),
-            'test method call' => array(
+            'test method call (I)' => array(
                 '<?php xyz($a=10, $b=20, $c=30);',
                 '<?php xyz($a=10 ,$b=20,$c=30);',
             ),
-            'test method call with multiple spaces' => array(
+            'test method call with multiple spaces (I)' => array(
                 '<?php xyz($a=10, $b=20, $c=30);',
                 '<?php xyz($a=10 , $b=20 ,          $c=30);',
                 '<?php xyz($a=10, $b=20,          $c=30);',
@@ -106,11 +105,11 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
             'test method call with \r\n not affected' => array(
                 "<?php xyz(\$a=10, \$b=20,\r\n                    \$c=30);",
             ),
-            'test method call' => array(
+            'test method call (II)' => array(
                 '<?php xyz($a=10, $b=20, $this->foo(), $c=30);',
                 '<?php xyz($a=10,$b=20 ,$this->foo() ,$c=30);',
             ),
-            'test method call with multiple spaces' => array(
+            'test method call with multiple spaces (II)' => array(
                 '<?php xyz($a=10, $b=20, $this->foo(), $c=30);',
                 '<?php xyz($a=10,$b=20 ,         $this->foo() ,$c=30);',
                 '<?php xyz($a=10, $b=20,         $this->foo(), $c=30);',
@@ -150,7 +149,7 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
                     $c=30) {
                 }',
             ),
-            'multiline comments also must be ignored' => array(
+            'multiline comments also must be ignored (I)' => array(
                 '<?php function xyz(
                     $a=10,  /* comment1a
                                comment1b
@@ -161,7 +160,7 @@ final class MethodArgumentSpaceFixerTest extends AbstractFixerTestCase
                     $c=30) {
                 }',
             ),
-            'multiline comments also must be ignored' => array(
+            'multiline comments also must be ignored (II)' => array(
                 '<?php
                     function xyz(
                         $a=10, /* multiline comment

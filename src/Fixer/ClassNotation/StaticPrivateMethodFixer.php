@@ -17,6 +17,7 @@ use PhpCsFixer\FixerDefinition\CodeSample;
 use PhpCsFixer\FixerDefinition\FixerDefinition;
 use PhpCsFixer\Tokenizer\Token;
 use PhpCsFixer\Tokenizer\Tokens;
+use PhpCsFixer\Tokenizer\TokensAnalyzer;
 
 /**
  * @author Filippo Tessarotto <zoeslam@gmail.com>
@@ -141,8 +142,9 @@ class Foo
             return;
         }
 
+        $tokensAnalyzer = new TokensAnalyzer($tokens);
         foreach ($methodsFound as $methodData) {
-            $this->fixReferencesInFunction($tokens, $methodData['name'], $methodData['curly_open'], $methodData['curly_close'], $fixedMethods);
+            $this->fixReferencesInFunction($tokens, $tokensAnalyzer, $methodData['name'], $methodData['curly_open'], $methodData['curly_close'], $fixedMethods);
         }
     }
 
@@ -190,13 +192,14 @@ class Foo
     }
 
     /**
-     * @param Tokens      $tokens
-     * @param null|string $name         Method name or null for Closures
-     * @param int         $methodOpen
-     * @param int         $methodClose
-     * @param array       $fixedMethods
+     * @param Tokens         $tokens
+     * @param TokensAnalyzer $tokensAnalyzer
+     * @param null|string    $name           Method name or null for Closures
+     * @param int            $methodOpen
+     * @param int            $methodClose
+     * @param array          $fixedMethods
      */
-    private function fixReferencesInFunction(Tokens $tokens, $name, $methodOpen, $methodClose, array $fixedMethods)
+    private function fixReferencesInFunction(Tokens $tokens, TokensAnalyzer $tokensAnalyzer, $name, $methodOpen, $methodClose, array $fixedMethods)
     {
         for ($index = $methodOpen + 1; $index < $methodClose - 1; ++$index) {
             if ($tokens[$index]->isGivenKind(T_FUNCTION)) {
@@ -204,15 +207,17 @@ class Foo
                 $closureStart = $tokens->getNextTokenOfKind($index, ['{']);
                 $closureEnd = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $closureStart);
                 if (!$tokens[$prevIndex]->isGivenKind(T_STATIC)) {
-                    $this->fixReferencesInFunction($tokens, null, $closureStart, $closureEnd, $fixedMethods);
+                    $this->fixReferencesInFunction($tokens, $tokensAnalyzer, null, $closureStart, $closureEnd, $fixedMethods);
                 }
 
                 $index = $closureEnd;
 
                 continue;
             }
-            if ($tokens[$index]->equals('{')) {
-                $index = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $index);
+
+            if ($tokens[$index]->isGivenKind(T_CLASS) && $tokensAnalyzer->isAnonymousClass($index)) {
+                $anonymousClassOpen = $tokens->getNextTokenOfKind($index, ['{']);
+                $index = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_CURLY_BRACE, $anonymousClassOpen);
 
                 continue;
             }

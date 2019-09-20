@@ -2084,7 +2084,7 @@ Choose from the list of available rules:
 
   Converts private methods to ``static`` where possible.
 
-  *Risky rule: risky when method contains dynamic generated calls to the instance, or the method is dynamically referenced.*
+  *Risky rule: risky when the method: contains dynamic generated calls to the instance, is dynamically referenced, is referenced inside a Trait the class uses.*
 
 * **strict_comparison** [@PhpCsFixer:risky]
 

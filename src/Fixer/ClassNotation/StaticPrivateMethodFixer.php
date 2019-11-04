@@ -113,10 +113,8 @@ class Foo
     }
 
     /**
-     * @param Tokens         $tokens
-     * @param TokensAnalyzer $tokensAnalyzer
-     * @param int            $classOpen
-     * @param int            $classClose
+     * @param int $classOpen
+     * @param int $classClose
      */
     private function fixClass(Tokens $tokens, TokensAnalyzer $tokensAnalyzer, $classOpen, $classClose)
     {
@@ -148,11 +146,9 @@ class Foo
     }
 
     /**
-     * @param Tokens         $tokens
-     * @param TokensAnalyzer $tokensAnalyzer
-     * @param int            $functionKeywordIndex
-     * @param int            $methodOpen
-     * @param int            $methodClose
+     * @param int $functionKeywordIndex
+     * @param int $methodOpen
+     * @param int $methodClose
      *
      * @return bool
      */
@@ -212,8 +208,6 @@ class Foo
     }
 
     /**
-     * @param Tokens              $tokens
-     * @param TokensAnalyzer      $tokensAnalyzer
      * @param int                 $methodOpen
      * @param int                 $methodClose
      * @param array<string, bool> $fixedMethods
@@ -267,9 +261,8 @@ class Foo
     }
 
     /**
-     * @param Tokens $tokens
-     * @param int    $classOpen
-     * @param int    $classClose
+     * @param int $classOpen
+     * @param int $classClose
      *
      * @return array
      */
